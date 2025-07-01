@@ -15,6 +15,7 @@ class ProductSelector extends Component
         $this->dispatch('product-selection-updated', selected: $this->selected);
     }
 
+
     public function render()
     {
         return view('livewire.product-selector', [

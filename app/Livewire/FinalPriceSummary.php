@@ -11,7 +11,11 @@ class FinalPriceSummary extends Component
 
     public $userType = 'normal';
 
-    protected $listeners = ['product-price-updated' => 'updateProductPrice', 'user-type-updated' => 'setUserType'];
+    protected $listeners = [
+        'product-price-updated' => 'updateProductPrice',
+        'user-type-updated' => 'setUserType',
+        'product-selection-updated' => 'syncWithSelectedProducts',
+    ];
 
     public function setUserType($type)
     {
@@ -30,6 +34,9 @@ class FinalPriceSummary extends Component
 
     public function getTotalProperty()
     {
+        if (empty($this->productPrices)) {
+            return 0;
+        }
 
         $subtotal = array_sum($this->productPrices);
         $total = $subtotal;
@@ -64,4 +71,15 @@ class FinalPriceSummary extends Component
 
         return round(max($total, 0), 2);
     }
+
+    public function syncWithSelectedProducts($selected)
+    {
+        // Remove prices of products that were deselected
+        $this->productPrices = array_filter(
+            $this->productPrices,
+            fn($key) => in_array($key, $selected),
+            ARRAY_FILTER_USE_KEY
+        );
+    }
+
 }
