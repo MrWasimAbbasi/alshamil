@@ -30,7 +30,7 @@
         }
     </script>
 </head>
-<body class="bg-gradient-to-br from-gray-100 to-white text-gray-900 font-sans">
+<body class="bg-gradient-to-br from-gray-100 via-white to-gray-200 text-gray-900 font-sans min-h-screen flex flex-col">
 
 {{-- Navbar --}}
 <header class="bg-white shadow-sm sticky top-0 z-10">
@@ -40,17 +40,18 @@
 </header>
 
 {{-- Main Content --}}
-<main class="py-10 px-4">
+<main class="flex-1 py-10 px-4">
     <div class="max-w-4xl mx-auto space-y-6 bg-white shadow-xl rounded-2xl p-8">
         {{ $slot }}
     </div>
 </main>
+
 {{-- Footer --}}
 <footer class="text-center py-6 text-sm text-gray-500">
     © {{ date('Y') }} Price Configurator App. Built with ❤️ + Livewire.
-    <a href="https://github.com/MrWasimAbbasi" target="_blank" class="text-primary hover:underline font-medium">GitHub</a>
+    <a href="https://github.com/MrWasimAbbasi" target="_blank"
+       class="text-primary hover:underline font-medium">GitHub</a>
 </footer>
-
 
 @livewireScripts
 </body>
