@@ -6,6 +6,9 @@ if [ ! -f .env ]; then
     cp .env.example .env
 fi
 
+echo "🧨 Generating App Key..."
+php artisan key:generate
+
 echo "📂 Ensuring SQLite database file exists..."
 if [ ! -f database/database.sqlite ]; then
     echo "📦 Creating SQLite database file..."
