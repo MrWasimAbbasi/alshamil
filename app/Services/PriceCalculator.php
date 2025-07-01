@@ -26,7 +26,6 @@ class PriceCalculator
         $subTotal = $base + $attributePrice;
         $final = $subTotal;
 
-// Load discount rules
         $rules = DiscountRule::all();
 
         foreach ($rules as $rule) {
