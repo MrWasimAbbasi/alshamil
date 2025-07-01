@@ -6,5 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class DiscountRule extends Model
 {
-    //
+    protected $casts = [
+        'condition' => 'array',
+    ];
+
 }

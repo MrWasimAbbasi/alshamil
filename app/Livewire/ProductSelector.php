@@ -12,13 +12,14 @@ class ProductSelector extends Component
 
     public function updatedSelected()
     {
-        $this->dispatch('productUpdated', $this->selected);
+        $this->dispatch('product-selection-updated', selected: $this->selected);
     }
 
     public function render()
     {
         return view('livewire.product-selector', [
-            'products' => Product::all()
+            'products' => Product::all(),
         ]);
     }
 }
+

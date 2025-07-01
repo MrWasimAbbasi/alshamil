@@ -6,12 +6,13 @@ use Livewire\Component;
 
 class UserTypeToggle extends Component
 {
-    public $userType = 'normal';
+    public $userType;
 
-    public function updatedUserType(): void
+    public function updatedUserType()
     {
-        $this->dispatch('userTypeUpdated', $this->userType);
+        $this->dispatch('user-type-updated', type: $this->userType);
     }
+
 
     public function render()
     {
