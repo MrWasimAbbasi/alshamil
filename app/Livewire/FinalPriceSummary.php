@@ -9,9 +9,16 @@ class FinalPriceSummary extends Component
 {
     public $productPrices = [];
 
-    protected $listeners = ['product-price-updated' => 'updatePrice'];
+    public $userType = 'normal';
 
-    public function updatePrice($productId, $price)
+    protected $listeners = ['product-price-updated' => 'updateProductPrice', 'user-type-updated' => 'setUserType'];
+
+    public function setUserType($type)
+    {
+        $this->userType = $type;
+    }
+
+    public function updateProductPrice($productId, $price)
     {
         $this->productPrices[$productId] = $price;
     }
@@ -23,11 +30,11 @@ class FinalPriceSummary extends Component
 
     public function getTotalProperty()
     {
+
         $subtotal = array_sum($this->productPrices);
+        $total = $subtotal;
 
-        $finalTotal = $subtotal;
-
-        // Check for min_total discount rule
+        // 🔸 Apply total-based discount (min_total rule)
         $minTotalRule = DiscountRule::where('type', 'total')->first();
 
         if (
@@ -36,13 +43,25 @@ class FinalPriceSummary extends Component
             $subtotal >= $minTotalRule->condition['min_total']
         ) {
             if ($minTotalRule->discount_type === 'percentage') {
-                $finalTotal -= $subtotal * ($minTotalRule->amount / 100);
+                $total -= $subtotal * ($minTotalRule->amount / 100);
             } elseif ($minTotalRule->discount_type === 'fixed') {
-                $finalTotal -= $minTotalRule->amount;
+                $total -= $minTotalRule->amount;
             }
         }
 
-        return round(max($finalTotal, 0), 2);
-    }
+        // 🔸 Apply user_type rule
+        $userTypeRule = DiscountRule::where('type', 'user_type')
+            ->whereJsonContains('condition->user_type', $this->userType)
+            ->first();
 
+        if ($userTypeRule) {
+            if ($userTypeRule->discount_type === 'percentage') {
+                $total -= $total * ($userTypeRule->amount / 100);
+            } elseif ($userTypeRule->discount_type === 'fixed') {
+                $total -= $userTypeRule->amount;
+            }
+        }
+
+        return round(max($total, 0), 2);
+    }
 }
