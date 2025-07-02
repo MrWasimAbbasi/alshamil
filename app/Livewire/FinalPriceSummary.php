@@ -56,9 +56,12 @@ class FinalPriceSummary extends Component
             }
         }
         // 🔸 Apply user_type rule
-        $userTypeRule = DiscountRule::where('type', 'user_type')
-            ->whereJsonContains('condition->user_type', $this->userType)
-            ->first();
+        $userType = $this->userType;
+        $userTypeRule = DiscountRule::where('type', 'user_type')->get()->first(function ($rule) use ($userType) {
+            $condition = json_decode($rule->condition, true);
+
+            return in_array($userType, (array) ($condition['user_type'] ?? []));
+        });
 
         if ($userTypeRule) {
             if ($userTypeRule->discount_type === 'percentage') {

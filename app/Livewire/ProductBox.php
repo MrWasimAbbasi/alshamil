@@ -54,10 +54,12 @@ class ProductBox extends Component
             }
 
             // 🔍 Apply attribute-based discounts from rules
-            $discountRule = DiscountRule::where('type', 'attribute')
-                ->whereJsonContains('condition->group', $group)
-                ->whereJsonContains('condition->value', $attr['value'] ?? '')
-                ->first();
+            $discountRule = DiscountRule::where('type', 'attribute')->get()->first(function ($rule) use ($group, $attr) {
+                $condition = json_decode($rule->condition, true);
+
+                return in_array($group, (array) ($condition['group'] ?? [])) &&
+                    in_array($attr['value'], (array) ($condition['value'] ?? []));
+            });
 
             if ($discountRule) {
                 if ($discountRule->discount_type === 'percentage') {
