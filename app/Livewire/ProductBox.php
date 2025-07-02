@@ -46,6 +46,9 @@ class ProductBox extends Component
         // Flatten all attributes
         $allAttributes = collect($this->productAttributesByGroup)->flatten(1);
 
+        // Track matching discount rules
+        $matchedDiscountRules = [];
+
         // Apply attribute prices
         foreach ($this->selectedAttributes as $group => $valueId) {
             $attr = $allAttributes->firstWhere('id', $valueId);
@@ -53,28 +56,33 @@ class ProductBox extends Component
                 $attributePrice += $attr['price'];
             }
 
-            // 🔍 Apply attribute-based discounts from rules
-            $discountRule = DiscountRule::where('type', 'attribute')->get()->first(function ($rule) use ($group, $attr) {
-                $condition = json_decode($rule->condition, true);
+            // Collect matching discount rules for this attribute
+            if ($attr) {
+                $rule = DiscountRule::where('type', 'attribute')->get()->first(function ($rule) use ($group, $attr) {
+                    $condition = json_decode($rule->condition, true);
+                    return in_array($group, (array) ($condition['group'] ?? [])) &&
+                        in_array($attr['value'], (array) ($condition['value'] ?? []));
+                });
 
-                return in_array($group, (array) ($condition['group'] ?? [])) &&
-                    in_array($attr['value'], (array) ($condition['value'] ?? []));
-            });
-
-            if ($discountRule) {
-                if ($discountRule->discount_type === 'percentage') {
-                    $discountAmount += ($basePrice + $attributePrice) * ($discountRule->amount / 100);
-                } elseif ($discountRule->discount_type === 'fixed') {
-                    $discountAmount += $discountRule->amount;
+                if ($rule) {
+                    $matchedDiscountRules[] = $rule;
                 }
+            }
+        }
+
+        // Apply discounts after all prices calculated
+        foreach ($matchedDiscountRules as $rule) {
+            if ($rule->discount_type === 'percentage') {
+                $discountAmount += ($basePrice + $attributePrice) * ($rule->amount / 100);
+            } elseif ($rule->discount_type === 'fixed') {
+                $discountAmount += $rule->amount;
             }
         }
 
         $subtotal = ($basePrice + $attributePrice) - $discountAmount;
 
-        $this->finalPrice = round(max($subtotal, 0), 2); // prevent negative
+        $this->finalPrice = round(max($subtotal, 0), 2); // ensure not negative
 
-        // Send subtotal (before min_total rule)
         $this->dispatch('product-price-updated', productId: $this->productId, price: $this->finalPrice);
     }
 

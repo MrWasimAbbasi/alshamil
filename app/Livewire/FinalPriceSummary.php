@@ -71,7 +71,7 @@ class FinalPriceSummary extends Component
             }
         }
 
-        return round(max($total, 0), 2);
+        return round($total, 2);
     }
 
     public function syncWithSelectedProducts($selected)

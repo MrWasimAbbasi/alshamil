@@ -74,7 +74,7 @@ class PriceCalculator
             'base_price' => $base,
             'attribute_price' => $attributePrice,
             'discounts' => $discounts,
-            'final' => max($final, 0),
+            'final' => round($final, 2),
         ];
     }
 }
