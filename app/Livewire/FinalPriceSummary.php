@@ -44,18 +44,17 @@ class FinalPriceSummary extends Component
         // 🔸 Apply total-based discount (min_total rule)
         $minTotalRule = DiscountRule::where('type', 'total')->first();
 
-        if (
-            $minTotalRule &&
-            isset($minTotalRule->condition['min_total']) &&
-            $subtotal >= $minTotalRule->condition['min_total']
-        ) {
-            if ($minTotalRule->discount_type === 'percentage') {
-                $total -= $subtotal * ($minTotalRule->amount / 100);
-            } elseif ($minTotalRule->discount_type === 'fixed') {
-                $total -= $minTotalRule->amount;
+        if ($minTotalRule) {
+            $condition = json_decode($minTotalRule->condition, true);
+
+            if (isset($condition['min_total']) && $subtotal >= $condition['min_total']) {
+                if ($minTotalRule->discount_type === 'percentage') {
+                    $total -= $subtotal * ($minTotalRule->amount / 100);
+                } elseif ($minTotalRule->discount_type === 'fixed') {
+                    $total -= $minTotalRule->amount;
+                }
             }
         }
-
         // 🔸 Apply user_type rule
         $userTypeRule = DiscountRule::where('type', 'user_type')
             ->whereJsonContains('condition->user_type', $this->userType)
